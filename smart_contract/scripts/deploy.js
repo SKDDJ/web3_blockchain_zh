@@ -1,10 +1,28 @@
+// 添加必要的导入
+const hre = require("hardhat");
+const { ethers } = require("hardhat");
+
 const main = async () => {
-  const transactionsFactory = await hre.ethers.getContractFactory("Transactions");
-  const transactionsContract = await transactionsFactory.deploy();
-
-  await transactionsContract.deployed();
-
-  console.log("Transactions address: ", transactionsContract.address);
+  try {
+    // 获取合约工厂
+    const Transactions = await ethers.getContractFactory("Transactions");
+    console.log("Deploying contract...");
+    
+    // 部署合约
+    const transactions = await Transactions.deploy();
+    
+    // 等待部署完成
+    await transactions.waitForDeployment();
+    
+    // 获取合约地址
+    const address = await transactions.getAddress();
+    console.log("Transactions deployed to:", address);
+    
+    return address;
+  } catch (error) {
+    console.error("Deployment error:", error);
+    throw error;
+  }
 };
 
 const runMain = async () => {
