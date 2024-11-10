@@ -1,7 +1,23 @@
-# Krypt - Web 3.0 Blockchain Application
+# Krypt - Web3.0 区块链交易应用
+> Krypt是一个基于以太坊的Web3.0应用程序，允许用户使用MetaMask钱包在以太坊网络上进行加密货币转账。该应用提供了一个现代化的用户界面，支持实时交易，并为每笔交易自动生成相关的GIF动画。
 
-### 0.在线演示
-访问地址：https://shiym.top/web3_blockchain_zh/
+### 0. 在线演示
+可以通过以下链接访问项目的在线演示版本：
+https://shiym.top/web3_blockchain_zh/
+
+注意：此演示版本部署在 GitHub Pages 上，仅用于展示界面功能。如需进行实际的区块链交易，请按照说明文档在本地部署完整版本。
+
+### 技术栈
+- 前端：React + Vite + TailwindCSS
+- 智能合约：Solidity + Hardhat
+- Web3集成：ethers.js
+- 钱包集成：MetaMask
+- API集成：GIPHY API
+
+### 项目结构
+项目分为两个主要部分：
+1. `client/` - 前端应用
+2. `smart_contract/` - 智能合约
 
 ### 1. 安装依赖
 
@@ -147,6 +163,90 @@ cd ../client
 npm run dev
 ```
 
+### 核心功能
+1. 钱包连接
+
+```javascript
+{!currentAccount && (
+  <button
+    type="button"
+    onClick={connectWallet}
+    className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
+  >
+    <AiFillPlayCircle className="text-white mr-2" />
+    <p className="text-white text-base font-semibold">
+      Connect Wallet
+    </p>
+  </button>
+)}
+```
+
+2. 加密货币转账
+
+```javascript
+const sendTransaction = async () => {
+  try {
+    if (ethereum) {
+      const { addressTo, amount, keyword, message } = formData;
+      const transactionsContract = createEthereumContract();
+      const parsedAmount = ethers.utils.parseEther(amount);
+
+      await ethereum.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: currentAccount,
+          to: addressTo,
+          gas: "0x5208",
+          value: parsedAmount._hex,
+        }],
+      });
+
+      const transactionHash = await transactionsContract.addToBlockchain(addressTo, parsedAmount, message, keyword);
+
+      setIsLoading(true);
+      console.log(`Loading - ${transactionHash.hash}`);
+      await transactionHash.wait();
+      console.log(`Success - ${transactionHash.hash}`);
+      setIsLoading(false);
+
+      const transactionsCount = await transactionsContract.getTransactionCount();
+
+      setTransactionCount(transactionsCount.toNumber());
+      window.location.reload();
+    } else {
+      console.log("No ethereum object");
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error("No ethereum object");
+  }
+};
+```
+
+3. 交易历史记录
+
+```solidity
+function getAllTransactions() public view returns (TransferStruct[] memory) {
+    return transactions;
+}
+```
+### 环境要求
+1. Node.js 环境
+2. MetaMask浏览器插件
+3. Hardhat开发环境
+4. GIPHY API密钥
+
+### 主要组件说明
+1. `Welcome.jsx` - 主页面组件，包含钱包连接和转账功能
+2. `Transactions.jsx` - 显示交易历史
+3. `Services.jsx` - 展示平台服务特性
+4. `TransactionContext.jsx` - 处理Web3交互的上下文组件
+
+### 常见问题处理
+- 端口 8545 被占用：使用 `lsof -i :8545` 找出并关闭占用进程
+- 部署失败：确保本地节点正在运行
+- 清理缓存：使用 `npx hardhat clean` 后重新编译部署
+
 ### 注意事项：
 
 1. 确保已安装 MetaMask 浏览器插件
@@ -160,3 +260,7 @@ npm run dev
 前端应用默认运行在：
 - 开发模式：http://localhost:5173
 - 生产模式：http://localhost:4173
+
+### 如何联系作者
+- 邮箱：yimingshi666@gmail.com
+- 微信：sym17358605372
