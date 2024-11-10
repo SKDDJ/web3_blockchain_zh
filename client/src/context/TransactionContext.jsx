@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { useTranslation } from 'react-i18next';
 
 import { contractABI, contractAddress } from "../utils/constants";
 
@@ -7,12 +8,20 @@ export const TransactionContext = React.createContext();
 
 const { ethereum } = window;
 
+// 将 createEthereumContract 移到文件顶部
 const createEthereumContract = () => {
-  const provider = new ethers.providers.Web3Provider(ethereum);
-  const signer = provider.getSigner();
-  const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
+  try {
+    if (!ethereum) return null;
+    
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-  return transactionsContract;
+    return transactionsContract;
+  } catch (error) {
+    console.error("创建合约实例失败:", error);
+    return null;
+  }
 };
 
 export const TransactionsProvider = ({ children }) => {
@@ -21,141 +30,136 @@ export const TransactionsProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
   const [transactions, setTransactions] = useState([]);
+  const { t } = useTranslation();
 
-  const handleChange = (e, name) => {
-    setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
+  const checkIfTransactionsExists = async () => {
+    try {
+      if (!ethereum) {
+        console.log("请安装 MetaMask");
+        return;
+      }
+
+      const contract = createEthereumContract();
+      if (!contract) {
+        console.log("合约创建失败");
+        return;
+      }
+
+      const currentTransactionCount = await contract.getTransactionCount();
+      window.localStorage.setItem("transactionCount", currentTransactionCount);
+    } catch (error) {
+      console.error("检查交易存在时出错:", error);
+      // 不要抛出错误，而是优雅地处理它
+    }
   };
 
   const getAllTransactions = async () => {
     try {
-      if (ethereum) {
-        const transactionsContract = createEthereumContract();
+      if (!ethereum) return;
+      
+      const contract = createEthereumContract();
+      if (!contract) return;
 
-        const availableTransactions = await transactionsContract.getAllTransactions();
+      const availableTransactions = await contract.getAllTransactions();
+      const structuredTransactions = availableTransactions.map((transaction) => ({
+        addressTo: transaction.receiver,
+        addressFrom: transaction.sender,
+        timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+        message: transaction.message,
+        keyword: transaction.keyword,
+        amount: parseInt(transaction.amount._hex) / (10 ** 18)
+      }));
 
-        const structuredTransactions = availableTransactions.map((transaction) => ({
-          addressTo: transaction.receiver,
-          addressFrom: transaction.sender,
-          timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
-          message: transaction.message,
-          keyword: transaction.keyword,
-          amount: parseInt(transaction.amount._hex) / (10 ** 18)
-        }));
-
-        console.log(structuredTransactions);
-
-        setTransactions(structuredTransactions);
-      } else {
-        console.log("Ethereum is not present");
-      }
+      setTransactions(structuredTransactions);
     } catch (error) {
-      console.log(error);
+      console.error("获取所有交易时出错:", error);
     }
   };
 
   const checkIfWalletIsConnect = async () => {
     try {
-      if (!ethereum) return alert("Please install MetaMask.");
+      if (!ethereum) {
+        console.log(t('errors.noMetaMask'));
+        return;
+      }
 
       const accounts = await ethereum.request({ method: "eth_accounts" });
-
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
-
-        getAllTransactions();
-      } else {
-        console.log("No accounts found");
+        await getAllTransactions();
       }
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const checkIfTransactionsExists = async () => {
-    try {
-      if (ethereum) {
-        const transactionsContract = createEthereumContract();
-        const currentTransactionCount = await transactionsContract.getTransactionCount();
-
-        window.localStorage.setItem("transactionCount", currentTransactionCount);
-      }
-    } catch (error) {
-      console.log(error);
-
-      throw new Error("No ethereum object");
+      console.error("检查钱包连接时出错:", error);
     }
   };
 
   const connectWallet = async () => {
     try {
-      if (!ethereum) return alert("Please install MetaMask.");
+      if (!ethereum) {
+        alert(t('errors.noMetaMask'));
+        return;
+      }
 
-      const accounts = await ethereum.request({ method: "eth_requestAccounts", });
-
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       setCurrentAccount(accounts[0]);
-      window.location.reload();
     } catch (error) {
-      console.log(error);
-
-      throw new Error("No ethereum object");
+      console.error("连接钱包时出错:", error);
     }
   };
 
   const sendTransaction = async () => {
     try {
-      if (ethereum) {
-        const { addressTo, amount, keyword, message } = formData;
-        const transactionsContract = createEthereumContract();
-        const parsedAmount = ethers.utils.parseEther(amount);
-
-        await ethereum.request({
-          method: "eth_sendTransaction",
-          params: [{
-            from: currentAccount,
-            to: addressTo,
-            gas: "0x5208",
-            value: parsedAmount._hex,
-          }],
-        });
-
-        const transactionHash = await transactionsContract.addToBlockchain(addressTo, parsedAmount, message, keyword);
-
-        setIsLoading(true);
-        console.log(`Loading - ${transactionHash.hash}`);
-        await transactionHash.wait();
-        console.log(`Success - ${transactionHash.hash}`);
-        setIsLoading(false);
-
-        const transactionsCount = await transactionsContract.getTransactionCount();
-
-        setTransactionCount(transactionsCount.toNumber());
-        window.location.reload();
-      } else {
-        console.log("No ethereum object");
+      if (!ethereum) {
+        alert(t('errors.noMetaMask'));
+        return;
       }
-    } catch (error) {
-      console.log(error);
 
-      throw new Error("No ethereum object");
+      const { addressTo, amount, keyword, message } = formData;
+      const contract = createEthereumContract();
+      if (!contract) return;
+
+      const parsedAmount = ethers.utils.parseEther(amount);
+
+      await ethereum.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: currentAccount,
+          to: addressTo,
+          gas: "0x5208",
+          value: parsedAmount._hex,
+        }],
+      });
+
+      const transactionHash = await contract.addToBlockchain(addressTo, parsedAmount, message, keyword);
+      setIsLoading(true);
+      await transactionHash.wait();
+      setIsLoading(false);
+
+      const transactionsCount = await contract.getTransactionCount();
+      setTransactionCount(transactionsCount.toNumber());
+    } catch (error) {
+      console.error("发送交易时出错:", error);
     }
   };
 
   useEffect(() => {
     checkIfWalletIsConnect();
     checkIfTransactionsExists();
-  }, [transactionCount]);
+  }, []);
 
   return (
     <TransactionContext.Provider
       value={{
-        transactionCount,
         connectWallet,
-        transactions,
         currentAccount,
-        isLoading,
-        sendTransaction,
-        handleChange,
         formData,
+        setformData,
+        handleChange: (e, name) => {
+          setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
+        },
+        sendTransaction,
+        transactions,
+        isLoading
       }}
     >
       {children}

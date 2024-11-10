@@ -1,0 +1,57 @@
+{
+    "navbar": {
+      "market": "Market",
+      "exchange": "Exchange", 
+      "tutorials": "Tutorials",
+      "wallets": "Wallets",
+      "login": "Login"
+    },
+    "welcome": {
+      "title": "Cross-Border Crypto Transfers",
+      "subtitle": "Explore the crypto world. Buy and sell cryptocurrencies easily on Krypto",
+      "connectWallet": "Connect Wallet",
+      "reliability": "Reliability",
+      "security": "Security",
+      "ethereum": "Ethereum",
+      "web3": "Web 3.0",
+      "lowFees": "Low Fees",
+      "blockchain": "Blockchain"
+    },
+    "services": {
+      "title": "Our Continuously Improving Services",
+      "subtitle": "The best choice for buying and selling crypto assets, we offer various user-friendly services",
+      "security": {
+        "title": "Security Guarantee",
+        "subtitle": "Security is guaranteed. We always maintain privacy and product quality"
+      },
+      "rates": {
+        "title": "Best Exchange Rates",
+        "subtitle": "Get the most competitive exchange rates in the market"
+      },
+      "transactions": {
+        "title": "Fastest Transactions",
+        "subtitle": "Lightning-fast transaction speed with instant confirmation"
+      }
+    },
+    "footer": {
+      "joinUs": "Join us and hear about the unexpected wonders",
+      "allRights": "All rights reserved",
+      "contact": "Contact Us"
+    },
+    "transaction": {
+      "address": "Address",
+      "amount": "Amount",
+      "message": "Message",
+      "keyword": "Keyword",
+      "send": "Send",
+      "loading": "Processing...",
+      "from": "From",
+      "to": "To"
+    },
+    "errors": {
+      "noMetaMask": "Please install MetaMask wallet",
+      "connectWallet": "Please connect your wallet first",
+      "fillFields": "Please fill in all fields",
+      "transactionFailed": "Transaction failed"
+    }
+  }

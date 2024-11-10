@@ -1,14 +1,26 @@
 import React, { useContext } from "react";
-
+import { useTranslation } from 'react-i18next';
 import { TransactionContext } from "../context/TransactionContext";
-
 import useFetch from "../hooks/useFetch";
 import dummyData from "../utils/dummyData";
 import { shortenAddress } from "../utils/shortenAddress";
 
+export const TransactionsProvider = ({ children }) => {
+  const { t } = useTranslation();
+
+  const handleError = (error) => {
+    if (!ethereum) {
+      alert(t('errors.noMetaMask'));
+      return;
+    }
+    console.log(error);
+    alert(t('errors.transactionFailed'));
+  };  
+}
+
 const TransactionsCard = ({ addressTo, addressFrom, timestamp, message, keyword, amount, url }) => {
   const gifUrl = useFetch({ keyword });
-
+  const { t } = useTranslation();
   return (
     <div className="bg-[#181918] m-4 flex flex-1
       2xl:min-w-[450px]
@@ -23,14 +35,17 @@ const TransactionsCard = ({ addressTo, addressFrom, timestamp, message, keyword,
           <a href={`https://ropsten.etherscan.io/address/${addressFrom}`} target="_blank" rel="noreferrer">
             <p className="text-white text-base">From: {shortenAddress(addressFrom)}</p>
           </a>
-          <a href={`https://ropsten.etherscan.io/address/${addressTo}`} target="_blank" rel="noreferrer">
-            <p className="text-white text-base">To: {shortenAddress(addressTo)}</p>
-          </a>
-          <p className="text-white text-base">Amount: {amount} ETH</p>
-          {message && (
-            <>
-              <br />
-              <p className="text-white text-base">Message: {message}</p>
+          <a href={`https://ropsten.etherscan.io/address/${addressFrom}`} target="_blank" rel="noreferrer">
+          <p className="text-white text-base">{t('transaction.from')}: {shortenAddress(addressFrom)}</p>
+        </a>
+        <a href={`https://ropsten.etherscan.io/address/${addressTo}`} target="_blank" rel="noreferrer">
+          <p className="text-white text-base">{t('transaction.to')}: {shortenAddress(addressTo)}</p>
+        </a>
+        <p className="text-white text-base">{t('transaction.amount')}: {amount} ETH</p>
+        {message && (
+          <>
+            <br />
+            <p className="text-white text-base">{t('transaction.message')}: {message}</p>
             </>
           )}
         </div>

@@ -1,0 +1,57 @@
+{
+  "navbar": {
+    "market": "市场",
+    "exchange": "交易所",
+    "tutorials": "教程",
+    "wallets": "钱包",
+    "login": "登录"
+  },
+  "welcome": {
+    "title": "跨境加密货币转账",
+    "subtitle": "探索加密货币世界，在Krypto轻松买卖加密货币",
+    "connectWallet": "连接钱包",
+    "reliability": "可靠性",
+    "security": "安全性",
+    "ethereum": "以太坊",
+    "web3": "Web 3.0",
+    "lowFees": "低手续费",
+    "blockchain": "区块链"
+  },
+  "services": {
+    "title": "我们持续改进的服务",
+    "subtitle": "为您提供购买和出售加密资产的最佳选择，我们提供各种友好的服务",
+    "security": {
+      "title": "安全保障",
+      "subtitle": "安全性有保证。我们始终保护隐私并保持产品质量"
+    },
+    "rates": {
+      "title": "最优汇率",
+      "subtitle": "获得市场上最优惠的交易汇率"
+    },
+    "transactions": {
+      "title": "最快交易",
+      "subtitle": "闪电般的交易速度，立即确认"
+    }
+  },
+  "footer": {
+    "joinUs": "加入我们，聆听意想不到的奇迹",
+    "allRights": "版权所有",
+    "contact": "联系我们"
+  },
+  "transaction": {
+    "address": "地址",
+    "amount": "金额",
+    "message": "消息",
+    "keyword": "关键词",
+    "send": "发送",
+    "loading": "处理中...",
+    "from": "从",
+    "to": "至"
+  },
+  "errors": {
+    "noMetaMask": "请安装 MetaMask 钱包",
+    "connectWallet": "请先连接钱包",
+    "fillFields": "请填写所有字段",
+    "transactionFailed": "交易失败"
+  }
+}
